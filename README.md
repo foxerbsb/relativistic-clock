@@ -214,21 +214,9 @@ To compile and upload this project to your **M5Stack CoreS3** using the Arduino 
 
 ---
 
-## 7. Repository Structure
-
-```
-/ (root folder)
-│
-├── /docs/              # Additional project documentation
-├── /src/               # Source code (.ino, .cpp, .h files)
-├── /assets/            # Images, diagrams, and media files
-├── README.md           # Project description (this file)
-└── LICENSE             # License information
-```
-
 ---
 
-## 8. References
+## 7. References
 
 - M5Stack CoreS3 Arduino Programming: https://docs.m5stack.com/en/arduino/m5cores3/program
 - WGS84 Reference System: https://earth-info.nga.mil
