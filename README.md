@@ -261,13 +261,11 @@ This is the actual repository layout after organizing the files:
 
 ```
 .
-├── src/
-│   └── relativistic_clock.ino
-├── include/
-│   ├── hud_gauges.h
-│   ├── relativistic_clock_hud.h
-│   ├── relativistic_clock_utils.h
-│   └── tinygps_hae_utils.h
+├── relativistic_clock.ino
+├── hud_gauges.h
+├── relativistic_clock_hud.h
+├── relativistic_clock_utils.h
+├── tinygps_hae_utils.h
 ├── assets/
 │   └── fonts/
 ├── README.md
