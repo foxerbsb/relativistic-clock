@@ -190,3 +190,115 @@ During the development of the project, I conducted some research and discovered 
 - **Place where Earth “spins” fastest:** Also the summit of Mount Chimborazo, due to the combination of altitude and proximity to the Equator.  
 
 ---
+
+---
+
+## 6. Compilation & Setup Instructions
+
+To compile and upload this project to your **M5Stack CoreS3** using the Arduino IDE:
+
+1. Install the latest [Arduino IDE](https://www.arduino.cc/en/software).
+2. Follow the official M5Stack CoreS3 Arduino setup guide:  
+   [M5Stack CoreS3 Arduino Programming Documentation](https://docs.m5stack.com/en/arduino/m5cores3/program)
+3. Install the required libraries:
+   - **M5Unified**
+   - **M5GFX**
+   - **TinyGPS++**
+   - **Adafruit BMP280**
+4. Select the board in Arduino IDE:  
+   **Tools → Board → ESP32 Arduino → M5Stack CoreS3**
+5. Set the correct COM port.
+6. Compile and upload the sketch.
+
+⚠ Tip: Ensure that you have installed the latest **ESP32 board support package** via the Arduino Boards Manager to guarantee compatibility.
+
+---
+
+## 7. Repository Structure
+
+```
+/ (root folder)
+│
+├── /docs/              # Additional project documentation
+├── /src/               # Source code (.ino, .cpp, .h files)
+├── /assets/            # Images, diagrams, and media files
+├── README.md           # Project description (this file)
+└── LICENSE             # License information
+```
+
+---
+
+## 8. References
+
+- M5Stack CoreS3 Arduino Programming: https://docs.m5stack.com/en/arduino/m5cores3/program
+- WGS84 Reference System: https://earth-info.nga.mil
+- EGM96 Geoid Model: https://earth-info.nga.mil/index.php?dir=wgs84&action=wgs84
+- Somigliana Gravity Formula: https://en.wikipedia.org/wiki/Gravity_of_Earth
+- Hafele–Keating Experiment: https://en.wikipedia.org/wiki/Hafele%E2%80%93Keating_experiment
+- Special and General Relativity: https://einstein.stanford.edu
+
+---
+
+## Build & Flash (Arduino IDE / M5Stack CoreS3)
+
+Follow the official M5Stack CoreS3 Arduino guide for environment setup and flashing steps:  
+**Documentation:** https://docs.m5stack.com/en/arduino/m5cores3/program
+
+### Prerequisites
+- **Arduino IDE 2.x** (or PlatformIO if you prefer).
+- **M5Stack CoreS3 board support** (install per the official guide above).
+- Libraries:
+  - **M5Unified**
+  - **M5GFX** (or **LovyanGFX**)
+  - **TinyGPS++**
+  - **Adafruit BMP280**
+  - (Optional) any auxiliary libraries you use in your fork
+
+### Quick Steps (Arduino IDE)
+1. Install Arduino IDE 2.x and configure the CoreS3 per the official guide linked above.
+2. Open the project in Arduino IDE.
+3. **Board:** select **M5Stack-CoreS3**.
+4. **Port:** select the serial port for your device.
+5. **PSRAM:** ensure PSRAM is **enabled** in board options (recommended).
+6. **Compile & Upload:** click **Verify** then **Upload**.
+7. On first run, grant the required permissions on the device if prompted.
+
+> Tip: If you see build or link errors, re-check the board package and library versions as indicated in the official guide.
+
+---
+
+## Project Structure
+
+This is the actual repository layout after organizing the files:
+
+```
+relativistic_clock/
+├── src/
+│   └── relativistic_clock.ino
+├── include/
+│   ├── hud_gauges.h
+│   ├── relativistic_clock_hud.h
+│   ├── relativistic_clock_utils.h
+│   └── tinygps_hae_utils.h
+├── assets/
+│   └── fonts/
+├── README.md
+└── LICENSE
+```
+
+- **src/**: contains the main Arduino `.ino` sketch.
+- **include/**: all project header files (`.h`).
+- **assets/fonts/**: fonts used by the UI.
+- **README.md**: project documentation.
+- **LICENSE**: license file (MIT by default).
+---
+
+## References
+
+- **M5Stack CoreS3 Arduino Programming Guide** — https://docs.m5stack.com/en/arduino/m5cores3/program  
+- **M5Unified** — Unified API for M5Stack devices  
+- **M5GFX / LovyanGFX** — High-performance graphics for ESP32 displays  
+- **TinyGPS++** — NMEA parsing and GNSS helpers  
+- **Adafruit BMP280** — Barometric altitude calculation library  
+- **WGS84 Ellipsoid** — Reference model for Earth shape/size  
+- **EGM96 Geoid** — Geoid separation model used when HAE is available
