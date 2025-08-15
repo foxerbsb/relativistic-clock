@@ -260,7 +260,7 @@ Follow the official M5Stack CoreS3 Arduino guide for environment setup and flash
 This is the actual repository layout after organizing the files:
 
 ```
-relativistic_clock/
+.
 ├── src/
 │   └── relativistic_clock.ino
 ├── include/
