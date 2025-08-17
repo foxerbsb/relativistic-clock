@@ -117,7 +117,7 @@ The project’s algorithm uses vector decomposition:
 - The east-west component directly interacts with Earth’s rotation, which can add or subtract speed.  
 - The north-south component always increases total speed relative to space, as it represents movement perpendicular to rotational motion.  
 
-📌 **Example:**  
+**Example:**  
 If you move northwest, part of your speed reduces the rotation effect (west component), while another part increases total speed (north component).  
 This ensures that the calculation is accurate for any direction and speed measured by GNSS.
 
@@ -138,7 +138,7 @@ In the project, this altitude can come in two ways:
 - Being above the ellipsoid, time runs slightly faster.  
 - Being below the ellipsoid, time runs slightly slower.  
 
-📌 **Actual behavior inside Earth:**  
+**Actual behavior inside Earth:**  
 - In the first layers below the surface, gravity tends to increase slightly due to being closer to the core.  
 - In deeper layers, gravity begins to decrease, as a significant portion of the planet’s mass is now above you, exerting force in the opposite direction.  
 - Near the outer core, gravity reaches a maximum and then gradually falls to zero exactly at Earth’s center.  
