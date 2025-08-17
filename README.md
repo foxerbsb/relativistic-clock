@@ -275,7 +275,7 @@ This is the actual repository layout after organizing the files:
 - **root/**: contains the main Arduino `.ino` sketch and all project header files (`.h`).
 - **assets/fonts/**: fonts used by the UI.
 - **README.md**: project documentation.
-- **LICENSE**: license file (MIT by default).
+- **LICENSE**: license file (MIT).
 ---
 
 ## References
