@@ -186,8 +186,8 @@ During the development of the project, I conducted some research and discovered 
 - **City where time runs slowest on the planet:** Pontianak, Indonesia.  
 - **City where time runs fastest:** Longyearbyen (home to the Svalbard Global Seed Vault). This vault stores over 1.3 million varieties of agricultural seeds, kept at about −18 °C inside a tunnel carved into a permafrost mountain, serving as a “world insurance policy” against biodiversity loss.  
 - **Tourist spot where time runs fastest:** Praia Café, Ilhéu das Rolas, São Tomé e Príncipe.  
-- **Place with the lowest gravity on Earth: the summit of Mount Chimborazo (Ecuador). It is the farthest point from Earth’s center, about 2.1 km farther than Mount Everest’s summit. Because of this greater distance from the core, local gravity is slightly weaker than anywhere else on land.
-- **Place where Earth “spins” fastest: the summit of Mount Cayambe (Ecuador). Being located exactly on the Equator, it experiences the maximum tangential velocity of Earth’s rotation, combined with its high altitude.
+- **Place with the lowest gravity on Earth:** the summit of Mount Chimborazo (Ecuador). It is the farthest point from Earth’s center, about 2.1 km farther than Mount Everest’s summit. Because of this greater distance from the core, local gravity is slightly weaker than anywhere else on land.
+- **Place where Earth “spins” fastest:** the summit of Mount Cayambe (Ecuador). Being located exactly on the Equator, it experiences the maximum tangential velocity of Earth’s rotation, combined with its high altitude.
 
 ---
 
