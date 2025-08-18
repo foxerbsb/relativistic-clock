@@ -220,10 +220,9 @@ void loop() {
   raw_az_deg = keepOr(raw_az_deg, az_now);
 
 
-  hae.update();  // Update N cache
-
-//HAE Mode
+  //HAE Mode
   if (HAE_MODE) {
+    hae.update();  // Update N cache
     double hae_m = hae.getHAE_m(5000);
     const double alt_now = hae_m;
     if (!isnan(alt_now) && isfinite(alt_now)) {
