@@ -1,5 +1,7 @@
 #pragma once
 #include <M5Unified.h>
+#include <vector>
+
 // ========= Simple Battery Status =========
 // 0–10%: red | 10–20%: yellow | >20%: dark green
 // No charging check, no voltage, no blinking.
@@ -106,21 +108,19 @@ void drawAltitudeGauge(M5Canvas &canvas, int cx, int cy,
   }
 }
 
-
-
-
-
-
-
-
-static inline int norm360(int a){ a%=360; if(a<0)a+=360; return a; }
-static inline float toCanvasRad(int deg){ return (deg - 90) * DEG_TO_RAD; }
+static inline int norm360(int a) {
+  a %= 360;
+  if (a < 0) a += 360;
+  return a;
+}
+static inline float toCanvasRad(int deg) {
+  return (deg - 90) * DEG_TO_RAD;
+}
 
 static void drawFixedTriangle(M5Canvas &canvas,
-                              int cx,int cy,int ring_outer_r,
-                              int tip_len_px,int base_half_deg,
-                              int direction_deg,uint16_t color)
-{
+                              int cx, int cy, int ring_outer_r,
+                              int tip_len_px, int base_half_deg,
+                              int direction_deg, uint16_t color) {
   float ang_c = toCanvasRad(direction_deg);
   float ang_l = toCanvasRad(norm360(direction_deg - base_half_deg));
   float ang_r = toCanvasRad(norm360(direction_deg + base_half_deg));
@@ -138,90 +138,82 @@ static void drawFixedTriangle(M5Canvas &canvas,
 }
 
 /**
- * Anel 360° + TRILHO 360° (mesma espessura do arco) + arco pequeno giratório (por baixo)
- * + 4 triângulos fixos (por cima).
+ * 360° ring + 360° TRACK (same thickness as arc) + small rotating arc (underneath)
+ * + 4 fixed triangles (on top).
  *
- * Se azimuth_deg == -1 (ou < 0), o ARCO é ocultado (trilho e triângulos continuam).
+ * If azimuth_deg == -1 (or < 0), the ARC is hidden (track and triangles remain).
  */
 void drawAzimuthRingWithArcUnderTriangles(M5Canvas &canvas,
-                                          int cx,int cy,
+                                          int cx, int cy,
                                           int gauge_outer_r,
                                           float azimuth_deg,
-                                          int ring_offset_px     = 7,
-                                          int ring_thickness     = 4,
-                                          int marker_arc_deg     = 12,
-                                          uint16_t color_ring    = 0,
-                                          uint16_t color_track   = 0,
-                                          uint16_t color_arc     = 0,
-                                          int tri_len_px         = 2,
-                                          int base_half_deg      = 7,
+                                          int ring_offset_px = 7,
+                                          int ring_thickness = 4,
+                                          int marker_arc_deg = 12,
+                                          uint16_t color_ring = 0,
+                                          uint16_t color_track = 0,
+                                          uint16_t color_arc = 0,
+                                          int tri_len_px = 2,
+                                          int base_half_deg = 7,
                                           int arc_inset_outer_px = 1,
                                           int arc_inset_inner_px = 1,
-                                          bool draw_track        = true)
-{
-  if(color_ring  == 0) color_ring  = canvas.color565(24,32,28);     // base
-  if(color_track == 0) color_track = canvas.color565(36,46,42);     // trilho sutil
-  if(color_arc   == 0) color_arc   = canvas.color565(230,240,255);  // marcador claro
+                                          bool draw_track = true) {
+  if (color_ring == 0) color_ring = canvas.color565(24, 32, 28);    // base
+  if (color_track == 0) color_track = canvas.color565(36, 46, 42);  // subtle track
+  if (color_arc == 0) color_arc = canvas.color565(230, 240, 255);   // bright marker
 
-  // Cores cardeais
-  uint16_t color_N = canvas.color565(255,  0,  0);
-  uint16_t color_E = canvas.color565(255,255,  0);
-  uint16_t color_S = canvas.color565(  0,120,255);
-  uint16_t color_W = canvas.color565(  0,255,  0);
+  // Cardinal colors
+  uint16_t color_N = canvas.color565(255, 0, 0);
+  uint16_t color_E = canvas.color565(255, 255, 0);
+  uint16_t color_S = canvas.color565(0, 120, 255);
+  uint16_t color_W = canvas.color565(0, 255, 0);
 
   const int ring_outer_r = gauge_outer_r + ring_offset_px;
   const int ring_inner_r = ring_outer_r - ring_thickness;
 
-  // 1) Anel base 360°
+  // 1) Base ring 360°
   canvas.fillArc(cx, cy, ring_outer_r, ring_inner_r, 0, 360, color_ring);
 
-  // Geometria do trilho/arco (mesma espessura)
+  // Track/arc geometry (same thickness)
   int track_outer = ring_outer_r - arc_inset_outer_px;
   int track_inner = ring_inner_r + arc_inset_inner_px;
   if (track_outer < track_inner) {
-    int mid = (track_outer + track_inner)/2;
+    int mid = (track_outer + track_inner) / 2;
     track_outer = mid + 1;
     track_inner = mid - 1;
     if (track_inner < 0) track_inner = 0;
   }
 
-  // 2) TRILHO 360° (opcional)
+  // 2) 360° TRACK (optional)
   if (draw_track) {
     canvas.fillArc(cx, cy, track_outer, track_inner, 0, 360, color_track);
   }
 
-  // 3) Arco pequeno giratório (por baixo) — oculta se azimuth == -1
-  bool hide_arc = (azimuth_deg < 0.0f);            // sentinel: -1 (ou qualquer negativo)
+  // 3) Small rotating arc (underneath) — hidden if azimuth == -1
+  bool hide_arc = (azimuth_deg < 0.0f);  // sentinel: -1 (or any negative)
   if (!hide_arc) {
-    if (marker_arc_deg < 1) marker_arc_deg = 1;    // segurança
+    if (marker_arc_deg < 1) marker_arc_deg = 1;  // safety
 
-    const int angle_offset_arc = 270;              // 0° (N) no topo
+    const int angle_offset_arc = 270;  // 0° (N) at top
     int center = norm360((int)lround(azimuth_deg) + angle_offset_arc);
-    int half   = marker_arc_deg / 2;
-    int start  = norm360(center - half);
-    int end    = norm360(center + half);
+    int half = marker_arc_deg / 2;
+    int start = norm360(center - half);
+    int end = norm360(center + half);
 
-    if(start <= end){
+    if (start <= end) {
       canvas.fillArc(cx, cy, track_outer, track_inner, start, end, color_arc);
-    }else{
+    } else {
       canvas.fillArc(cx, cy, track_outer, track_inner, start, 360, color_arc);
-      canvas.fillArc(cx, cy, track_outer, track_inner, 0, end,   color_arc);
+      canvas.fillArc(cx, cy, track_outer, track_inner, 0, end, color_arc);
     }
   }
 
-  // 4) Triângulos fixos por cima
-  drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg,   0, color_N);
-  drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg,  90, color_E);
+  // 4) Fixed triangles on top
+  drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg, 0, color_N);
+  drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg, 90, color_E);
   drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg, 180, color_S);
   drawFixedTriangle(canvas, cx, cy, ring_outer_r, tri_len_px, base_half_deg, 270, color_W);
 }
-
-
-
-
-
-
-
 
 
 // Arc gauge for latitude with a fixed orange pointer.
@@ -305,7 +297,6 @@ void drawSpeedBarGauge(M5Canvas &canvas, int x, int y, int width, int height,
   // Optional border
   // canvas.drawRect(x, y, width, height, canvas.color565(80, 80, 80));
 }
-
 
 // Horizontal bar with gradient and optional scale (min, mid, max).
 // - Fills from left (min) to right (max)
@@ -414,7 +405,6 @@ void drawHorizontalBarGauge(
     canvas.setTextDatum(TL_DATUM);  // restore default
   }
 }
-
 
 
 // === HDOP -> bars / level (unchanged logic) ===
@@ -541,84 +531,92 @@ inline void drawGpsSignalGauge5Smooth(M5Canvas &c, int x, int y, int h,
 }
 
 
-// ECG deslizante com grid horizontal por UNIDADE e grid vertical denso (parametrizável)
-#include <vector>
-
+// Sliding ECG with horizontal grid per UNIT and dense vertical grid (parametrizable)
 void drawTimeDilationChart(M5Canvas &canvas, double dilation_value,
-                       double minVal = -6.0, double maxVal = 3.0,
-                       uint16_t colBg = 0, uint16_t colLine = 0,
-                       uint16_t colZero = 0, uint16_t colGrid = 0,
-                       int dashLen = 4, int gapLen = 3,
-                       int vStepPx = 6, int vMajorEvery = 4, uint16_t colGridMajor = 0)
-{
-    // Cores padrão
-    if (colBg         == 0) colBg         = 0;
-    if (colLine       == 0) colLine       = canvas.color565(80,255,80);   // onda
-    if (colZero       == 0) colZero       = canvas.color565(220,170,40);  // zero (âmbar)
-    if (colGrid       == 0) colGrid       = canvas.color565(18,36,18);    // grid fino
-    if (colGridMajor  == 0) colGridMajor  = canvas.color565(32,64,32);    // grid "major"
+                           double minVal = -6.0, double maxVal = 3.0,
+                           uint16_t colBg = 0, uint16_t colLine = 0,
+                           uint16_t colZero = 0, uint16_t colGrid = 0,
+                           int dashLen = 4, int gapLen = 3,
+                           int vStepPx = 6, int vMajorEvery = 4, uint16_t colGridMajor = 0) {
+  // Default colors
+  if (colBg == 0) colBg = 0;
+  if (colLine == 0) colLine = canvas.color565(80, 255, 80);           // waveform
+  if (colZero == 0) colZero = canvas.color565(220, 170, 40);          // zero (amber)
+  if (colGrid == 0) colGrid = canvas.color565(18, 36, 18);            // fine grid
+  if (colGridMajor == 0) colGridMajor = canvas.color565(32, 64, 32);  // “major” grid
 
-    const int W = canvas.width();
-    const int H = canvas.height();
-    if (W < 3 || H < 3) return;
+  const int W = canvas.width();
+  const int H = canvas.height();
+  if (W < 3 || H < 3) return;
 
-    auto mapf_clamp = [](double v, double inMin, double inMax, int outMin, int outMax) {
-        if (v < inMin) v = inMin;
-        if (v > inMax) v = inMax;
-        double p = (v - inMin) / (inMax - inMin);
-        return int(outMin + p * (outMax - outMin) + 0.5);
-    };
+  auto mapf_clamp = [](double v, double inMin, double inMax, int outMin, int outMax) {
+    if (v < inMin) v = inMin;
+    if (v > inMax) v = inMax;
+    double p = (v - inMin) / (inMax - inMin);
+    return int(outMin + p * (outMax - outMin) + 0.5);
+  };
 
-    // estado: buffer circular
-    struct State { bool prim=true; int head=-1; int lastW=0,lastH=0; std::vector<int> ybuf; };
-    static State st;
+  // State: circular buffer
+  struct State {
+    bool prim = true;
+    int head = -1;
+    int lastW = 0, lastH = 0;
+    std::vector<int> ybuf;
+  };
+  static State st;
 
-    if (st.prim || st.lastW!=W || st.lastH!=H) {
-        st.ybuf.assign(W, mapf_clamp(dilation_value, minVal, maxVal, H-1, 0));
-        st.head = W-1; st.lastW=W; st.lastH=H; st.prim=false;
-    } else {
-        st.head = (st.head + 1) % W;
-        st.ybuf[st.head] = mapf_clamp(dilation_value, minVal, maxVal, H-1, 0);
+  if (st.prim || st.lastW != W || st.lastH != H) {
+    st.ybuf.assign(W, mapf_clamp(dilation_value, minVal, maxVal, H - 1, 0));
+    st.head = W - 1;
+    st.lastW = W;
+    st.lastH = H;
+    st.prim = false;
+  } else {
+    st.head = (st.head + 1) % W;
+    st.ybuf[st.head] = mapf_clamp(dilation_value, minVal, maxVal, H - 1, 0);
+  }
+
+  // Background
+  canvas.fillScreen(colBg);
+
+  // DENSE VERTICAL GRID (major lines every vMajorEvery * vStepPx)
+  if (vStepPx < 1) vStepPx = 1;
+  for (int x = 0; x < W; x += vStepPx) {
+    bool isMajor = (vMajorEvery > 0) && (x % (vStepPx * vMajorEvery) == 0);
+    canvas.drawFastVLine(x, 0, H, isMajor ? colGridMajor : colGrid);
+  }
+
+  // HORIZONTAL GRID per unit (except zero)
+  int uStart = (int)ceil(minVal);
+  int uEnd = (int)floor(maxVal);
+  for (int u = uStart; u <= uEnd; ++u) {
+    if (u == 0) continue;
+    int yU = mapf_clamp((double)u, minVal, maxVal, H - 1, 0);
+    canvas.drawFastHLine(0, yU, W, colGrid);
+  }
+
+  // Zero as dashed line (if inside range)
+  if (minVal <= 0.0 && 0.0 <= maxVal) {
+    int yZero = mapf_clamp(0.0, minVal, maxVal, H - 1, 0);
+    for (int x = 0; x < W; x += (dashLen + gapLen)) {
+      int len = dashLen;
+      if (x + len > W) len = W - x;
+      if (len > 0) canvas.drawFastHLine(x, yZero, len, colZero);
     }
+  }
 
-    // fundo
-    canvas.fillScreen(colBg);
-
-    // GRID VERTICAL denso (linhas "major" a cada vMajorEvery*vStepPx)
-    if (vStepPx < 1) vStepPx = 1;
-    for (int x = 0; x < W; x += vStepPx) {
-        bool isMajor = (vMajorEvery > 0) && (x % (vStepPx * vMajorEvery) == 0);
-        canvas.drawFastVLine(x, 0, H, isMajor ? colGridMajor : colGrid);
-    }
-
-    // GRID HORIZONTAL por unidade (exceto zero)
-    int uStart = (int)ceil(minVal);
-    int uEnd   = (int)floor(maxVal);
-    for (int u = uStart; u <= uEnd; ++u) {
-        if (u == 0) continue;
-        int yU = mapf_clamp((double)u, minVal, maxVal, H-1, 0);
-        canvas.drawFastHLine(0, yU, W, colGrid);
-    }
-
-    // zero tracejada (se estiver no range)
-    if (minVal <= 0.0 && 0.0 <= maxVal) {
-        int yZero = mapf_clamp(0.0, minVal, maxVal, H-1, 0);
-        for (int x = 0; x < W; x += (dashLen + gapLen)) {
-            int len = dashLen; if (x + len > W) len = W - x;
-            if (len > 0) canvas.drawFastHLine(x, yZero, len, colZero);
-        }
-    }
-
-    // onda “deslizando”: mais novo na direita
-    auto idx_from_x = [&](int x)->int {
-        int k = st.head - (W - 1 - x);
-        k %= W; if (k < 0) k += W;
-        return k;
-    };
-    int x0 = 0, y0 = st.ybuf[idx_from_x(0)];
-    for (int x = 1; x < W; ++x) {
-        int y1 = st.ybuf[idx_from_x(x)];
-        canvas.drawLine(x0, y0, x, y1, colLine);
-        x0 = x; y0 = y1;
-    }
+  // Sliding waveform: newest at the right
+  auto idx_from_x = [&](int x) -> int {
+    int k = st.head - (W - 1 - x);
+    k %= W;
+    if (k < 0) k += W;
+    return k;
+  };
+  int x0 = 0, y0 = st.ybuf[idx_from_x(0)];
+  for (int x = 1; x < W; ++x) {
+    int y1 = st.ybuf[idx_from_x(x)];
+    canvas.drawLine(x0, y0, x, y1, colLine);
+    x0 = x;
+    y0 = y1;
+  }
 }
