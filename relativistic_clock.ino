@@ -45,6 +45,18 @@ M5Canvas canvasDynamicLineChart(&M5.Display);
 const double SPEED_OF_LIGHT = 299792458.0;  // m/s
 const bool HAE_MODE = false;
 
+
+// GR mode:
+// 0 = local (g*h/c^2)
+// 1 = absolute WITH reference ((Phi_here - Phi_ref)/c^2)
+// 2 = absolute WITHOUT reference (Phi_here/c^2)
+const int GR_MODE = 1;  // set to 0, 1, or 2
+
+// --- Location simulation (compile-time) ---
+const bool SIM_MODE = false;  // false = disable simulation
+const double SIM_LAT = 0;   // dec
+const double SIM_ALT = 0;    // m
+
 // ---- Sensor objects ----
 Adafruit_BMP280 barometer(&Wire1);
 TinyGPSPlus gps;
@@ -55,8 +67,8 @@ HardwareSerial GNSSSerial(1);  // UART1 for GNSS
 
 // ---- Earth rotation tangential speed (m/s) at given lat/alt ----
 double calcEarthRotationSpeed(double latitude_deg, double altitude_m) {
-  const double a = 6378137.0;  // WGS-84 semi-major axis
-  const double b = 6356752.0;  // WGS-84 semi-minor axis
+  const double a = 6378137.0;       // WGS-84 semi-major axis
+  const double b = 6356752.314245;  // WGS-84 semi-minor axis
   const double phi = radians(latitude_deg);
   const double s = sin(phi), c = cos(phi);
   const double e2 = (a * a - b * b) / (a * a);
@@ -66,7 +78,7 @@ double calcEarthRotationSpeed(double latitude_deg, double altitude_m) {
 }
 
 double calcLocalGravity(double latitude_deg, double altitude_m) {
-  // Clamp opcional para evitar entradas absurdas (ex.: leituras ruins)
+  // Optional clamp to avoid absurd inputs (e.g., bad readings)
   if (altitude_m < -500.0) altitude_m = -500.0;
   if (altitude_m > 20000.0) altitude_m = 20000.0;
 
@@ -74,14 +86,14 @@ double calcLocalGravity(double latitude_deg, double altitude_m) {
   const double s = sin(phi);
   const double sin2 = s * s;
 
-  // Constantes WGS84 “clássicas”
+  // Classic WGS84 constants
   const double ge = 9.7803253359;  // m/s²
   const double k = 0.00193185265241;
   const double e2 = 0.00669437999013;
 
   const double g0 = ge * (1.0 + k * sin2) / sqrt(1.0 - e2 * sin2);
 
-  // Correção de ar livre linear (~0.3086 mGal/m = 3.086e-6 m/s² por metro)
+  // Linear free-air correction (~0.3086 mGal/m = 3.086e-6 m/s² per meter)
   return g0 - 3.086e-6 * altitude_m;
 }
 
@@ -91,6 +103,11 @@ double calcTimeDilation(double velocity_kmh, double azimuth_deg, double latitude
                         double &out_gravity, double &out_earthRotationSpeed, double &out_relativeVelocity) {
   // Convert to m/s
   const double v = velocity_kmh / 3.6;
+
+  if (SIM_MODE) {
+    latitude_deg = SIM_LAT;
+    altitude_m = SIM_ALT;
+  }
 
   // Horizontal components (0° = North, 90° = East)
   const double vE = v * sin(radians(azimuth_deg));  // East (+)
@@ -111,8 +128,32 @@ double calcTimeDilation(double velocity_kmh, double azimuth_deg, double latitude
   // SR: slows clock (negative)
   const double deltaSR = -(vTot * vTot) / (2.0 * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
 
-  // GR: speeds clock (positive)
-  const double deltaGR = (g * altitude_m) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+  // GR: General Relativity
+  double deltaGR = 0.0;
+
+  if (GR_MODE == 0) {
+    // Local GR WITHOUT centrifugal: g_pure ≈ GM / r0^2
+    const double r0 = geocentric_radius_m(latitude_deg, 0.0);
+    const double g_pure = GM_EARTH / (r0 * r0);
+    deltaGR = (g_pure * altitude_m) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+
+  } else {
+    // Absolute modes: use ONLY the gravitational potential (no centrifugal term)
+    const double r = geocentric_radius_m(latitude_deg, altitude_m);
+    const double Phi_here = -GM_EARTH / r;
+
+    if (GR_MODE == 1) {
+      // (1) Absolute WITH reference (e.g., Equator, 0 m)
+      const double r0 = geocentric_radius_m(0.0, 0.0);
+      const double Phi_ref = -GM_EARTH / r0;
+      deltaGR = (Phi_here - Phi_ref) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+
+    } else {  // GR_MODE == 2
+      // (2) Absolute WITHOUT reference (raw value)
+      deltaGR = (Phi_here) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+    }
+  }
+
 
   // Net (ns per second)
   return (deltaSR + deltaGR) * 1e9;
