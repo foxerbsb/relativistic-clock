@@ -92,43 +92,6 @@ It is worth noting that these results are theoretical estimates, based on the co
 
 
 
-# GR Modes — Documentation
-
-> This project computes **Special Relativity (SR)** and **General Relativity (GR)** separately.  
-> **SR** uses velocity (Earth’s rotation `vRot` + your ground speed).  
-> **GR** uses **gravitational potential only** (no centrifugal term) to avoid double-counting rotation.
-
----
-
-## Mode 0 — Local (HAE-referenced altitude at the current location)
-
-**Formula**  
-`delta_GR ≈ (g_pure * h) / c²`, with `g_pure ≈ GM / r0²` and `r0 = r(lat, h=0)`.
-
-**Reference**  
-`h = 0 m` **HAE** (WGS84 ellipsoid) at your latitude.
-
-**Behavior**
-- `h = 0` → `delta_GR = 0`
-- `h > 0` → positive (clock runs slightly faster)
-- `h < 0` → negative (clock runs slightly slower)
-
-**SR interplay**  
-SR keeps `vRot` + your ground speed.
-
-**Use when**  
-You want to see **how much climbing/descending here** changes the clock.
-
-**Code sketch**
-```cpp
-// Mode 0 (local)
-const double r0     = geocentric_radius_m(latitude_deg, 0.0);
-const double g_pure = GM_EARTH / (r0 * r0);             // no centrifugal
-deltaGR = (g_pure * altitude_m) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
-
-
-
-
 ---
 
 ## 4. How It Works
