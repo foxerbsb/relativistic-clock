@@ -39,7 +39,7 @@ static void setNmeaMsgRate(HardwareSerial &ser, uint8_t nmeaId, uint8_t rateUART
 }
 
 // High-rate navigation (25 Hz) with reduced GSA/GSV to 1 Hz
-void initUblox25Hz_reduceGSV_GSA(HardwareSerial &ser,uint32_t targetBaud = 460800, bool savePermanent = false) {
+void initUblox25Hz_reduceGSV_GSA(HardwareSerial &ser, uint32_t targetBaud = 460800, bool savePermanent = false) {
   delay(200);
 
   // 1) Set UART1 baud rate
@@ -104,3 +104,22 @@ static inline double smooth_heading_deg(double prev, double now, float a) {
   if (out < 0) out += 360.0;
   return out;
 }
+
+
+// Absolute GR – required constants (no centrifugal term)
+static constexpr double GM_EARTH = 3.986004418e14;   // m^3/s^2
+static constexpr double WGS84_A  = 6378137.0;        // m
+static constexpr double WGS84_B  = 6356752.314245;   // m
+static constexpr double WGS84_E2 = 1.0 - (WGS84_B * WGS84_B) / (WGS84_A * WGS84_A);
+
+// Geocentric radius |r| for geodetic latitude and altitude
+inline double geocentric_radius_m(double lat_deg, double h_m) {
+  const double phi  = radians(lat_deg);
+  const double sinp = sin(phi);
+  const double cosp = cos(phi);
+  const double N    = WGS84_A / sqrt(1.0 - WGS84_E2 * sinp * sinp);
+  const double X    = (N + h_m) * cosp;
+  const double Z    = (N * (1.0 - WGS84_E2) + h_m) * sinp;
+  return sqrt(X * X + Z * Z);
+}
+
