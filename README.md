@@ -90,6 +90,95 @@ It is worth noting that these results are theoretical estimates, based on the co
 
 **Output:** Estimated time difference in nanoseconds/hour.
 
+# GR Modes — Documentation
+
+> This project computes **Special Relativity (SR)** and **General Relativity (GR)** separately.  
+> **SR** uses velocity (Earth’s rotation `vRot` + your ground speed).  
+> **GR** uses **gravitational potential only** (no centrifugal term) to avoid double-counting rotation.
+
+---
+
+## Mode 0 — Local (HAE-referenced altitude at the current location)
+
+**Formula**  
+`delta_GR ≈ (g_pure * h) / c²`, with `g_pure ≈ GM / r0²` and `r0 = r(lat, h=0)`.
+
+**Reference**  
+`h = 0 m` **HAE** (WGS84 ellipsoid) at your latitude.
+
+**Behavior**
+- `h = 0` → `delta_GR = 0`
+- `h > 0` → positive (clock runs slightly faster)
+- `h < 0` → negative (clock runs slightly slower)
+
+**SR interplay**  
+SR keeps `vRot` + your ground speed.
+
+**Use when**  
+You want to see **how much climbing/descending here** changes the clock.
+
+**Code sketch**
+```cpp
+// Mode 0 (local)
+const double r0     = geocentric_radius_m(latitude_deg, 0.0);
+const double g_pure = GM_EARTH / (r0 * r0);             // no centrifugal
+deltaGR = (g_pure * altitude_m) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+```
+
+---
+
+## Mode 1 — Absolute **with reference** (Equator, 0 m HAE)
+
+**Formula**  
+`delta_GR = (Phi(lat,h) − Phi_eq0) / c²`, where `Phi = −GM / r`.  
+*(No centrifugal term in `Phi`; rotation is already in SR.)*
+
+**Reference**  
+**Equator, 0 m (HAE)** — fixed global baseline.
+
+**SR interplay**  
+SR includes `vRot`; GR remains **pure gravity**.
+
+**Use when**  
+You want to **compare places/cities** consistently.
+
+**Code sketch**
+```cpp
+// Mode 1 (absolute with reference: Equator, 0 m HAE)
+const double r      = geocentric_radius_m(latitude_deg, altitude_m);
+const double Phi    = -GM_EARTH / r;
+const double r_ref  = geocentric_radius_m(0.0, 0.0);
+const double PhiRef = -GM_EARTH / r_ref;
+deltaGR = (Phi - PhiRef) / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+```
+
+---
+
+## Mode 2 — Absolute **without reference** (raw)
+
+**Formula**  
+`delta_GR = Phi(lat,h) / c²`, with `Phi = −GM / r`.
+
+**Behavior**  
+Raw values are **negative** at Earth’s surface (useful for diagnostics).
+
+**Use when**  
+Debugging/visualization (optionally subtract a runtime baseline for display).
+
+**Code sketch**
+```cpp
+// Mode 2 (absolute raw)
+const double r   = geocentric_radius_m(latitude_deg, altitude_m);
+const double Phi = -GM_EARTH / r;
+deltaGR = Phi / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+```
+
+---
+
+## Implementation Notes (all modes)
+
+- **No double counting:** SR already has Earth’s rotation; GR **excludes** the centrifugal term.
+- **Altitude source:** current setup uses **HAE**. If you ever feed MSL (barometric), Mode 0’s zero becomes **local sea level**.
 
 
 ---
